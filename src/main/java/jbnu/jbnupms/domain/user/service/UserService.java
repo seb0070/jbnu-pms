@@ -1,5 +1,6 @@
 package jbnu.jbnupms.domain.user.service;
 
+import jbnu.jbnupms.common.audit.UserAuditLogger;
 import jbnu.jbnupms.common.exception.ErrorCode;
 import jbnu.jbnupms.common.exception.GlobalException;
 import jbnu.jbnupms.domain.user.dto.UpdateUserRequest;
@@ -25,6 +26,7 @@ public class UserService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final WithdrawnUserRepository withdrawnUserRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserAuditLogger auditLogger;
 
     public UserResponse getMyInfo(Long userId) {
         User user = findActiveUserById(userId);
@@ -63,9 +65,25 @@ public class UserService {
 
             String encodedPassword = passwordEncoder.encode(request.getPassword());
             user.updatePassword(encodedPassword);
+
+            // 비밀번호 변경 로그
+            auditLogger.logChangePassword(user.getId());
         }
 
         userRepository.save(user);
+
+        // 프로필 업데이트 로그
+        if (!oldName.equals(user.getName()) ||
+                (oldProfileImage != null && !oldProfileImage.equals(user.getProfileImage()))) {
+            auditLogger.logUpdateProfile(
+                    requestUserId,
+                    targetUserId,
+                    oldName,
+                    user.getName(),
+                    oldProfileImage,
+                    user.getProfileImage()
+            );
+        }
 
         return UserResponse.from(user);
     }
@@ -92,6 +110,9 @@ public class UserService {
 
         // 3. 리프레시 토큰 삭제
         refreshTokenRepository.deleteByUserId(targetUserId);
+
+        // 4. 감사 로그 기록
+        auditLogger.logDelete(requestUserId, targetUserId, user.getEmail(), reason);
 
         log.info("User deleted successfully: userId={}, email={}", targetUserId, user.getEmail());
     }

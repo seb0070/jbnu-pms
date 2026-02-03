@@ -1,5 +1,6 @@
 package jbnu.jbnupms.domain.user.service;
 
+import jbnu.jbnupms.common.audit.UserAuditLogger;
 import jbnu.jbnupms.common.exception.ErrorCode;
 import jbnu.jbnupms.common.exception.GlobalException;
 import jbnu.jbnupms.security.jwt.JwtTokenProvider;
@@ -30,6 +31,7 @@ public class AuthService {
     private final WithdrawnUserRepository withdrawnUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserAuditLogger auditLogger;
 
     @Transactional
     public Long register(RegisterRequest request) {
@@ -46,6 +48,14 @@ public class AuthService {
                 .build();
 
         User savedUser = userRepository.save(user);
+
+        // 감사 로그 기록
+        auditLogger.logRegister(
+                savedUser.getId(),
+                savedUser.getEmail(),
+                savedUser.getName(),
+                savedUser.getProvider()
+        );
 
         return savedUser.getId();
     }
