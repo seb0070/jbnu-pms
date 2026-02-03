@@ -10,13 +10,16 @@ import jbnu.jbnupms.domain.user.entity.RefreshToken;
 import jbnu.jbnupms.domain.user.entity.User;
 import jbnu.jbnupms.domain.user.repository.RefreshTokenRepository;
 import jbnu.jbnupms.domain.user.repository.UserRepository;
+import jbnu.jbnupms.domain.user.repository.WithdrawnUserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -24,11 +27,13 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final WithdrawnUserRepository withdrawnUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
     public Long register(RegisterRequest request) {
+        // 이메일 중복 확인
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new GlobalException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
@@ -50,7 +55,7 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new GlobalException(ErrorCode.INVALID_CREDENTIALS));
 
-        if (user.getDeletedAt() != null) {
+        if (user.getIsDeleted()) {
             throw new GlobalException(ErrorCode.USER_ALREADY_DELETED);
         }
 
@@ -77,7 +82,7 @@ public class AuthService {
             throw new GlobalException(ErrorCode.EXPIRED_TOKEN);
         }
 
-        User user = userRepository.findById(refreshToken.getUserId())
+        User user = userRepository.findActiveById(refreshToken.getUserId())
                 .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
 
         String newAccessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail());

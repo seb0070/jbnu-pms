@@ -1,6 +1,7 @@
 package jbnu.jbnupms.domain.user.controller;
 
 import jakarta.validation.Valid;
+import jbnu.jbnupms.domain.user.dto.DeleteUserRequest;
 import jbnu.jbnupms.domain.user.dto.UpdateUserRequest;
 import jbnu.jbnupms.domain.user.dto.UserResponse;
 import jbnu.jbnupms.domain.user.service.UserService;
@@ -41,10 +42,11 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteUser(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable Long userId
+            @PathVariable Long userId,
+            @Valid @RequestBody DeleteUserRequest request
     ) {
         Long requestUserId = Long.parseLong(userDetails.getUsername());
-        userService.deleteUser(requestUserId, userId);
+        userService.deleteUser(requestUserId, userId, request.getReason());
         return ResponseEntity.ok().build();
     }
 }

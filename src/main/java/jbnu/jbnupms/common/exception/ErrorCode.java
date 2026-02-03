@@ -27,7 +27,8 @@ public enum ErrorCode {
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "USER_002", "이미 존재하는 이메일입니다."),
     USER_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "USER_003", "이미 탈퇴한 사용자입니다."),
     PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST, "USER_004", "비밀번호가 일치하지 않습니다."),
-    CANNOT_DELETE_SELF(HttpStatus.BAD_REQUEST, "USER_005", "본인 계정은 삭제할 수 없습니다.");
+    CANNOT_DELETE_SELF(HttpStatus.BAD_REQUEST, "USER_005", "본인 계정은 삭제할 수 없습니다."),
+    SOCIAL_USER_PASSWORD_CHANGE(HttpStatus.BAD_REQUEST, "USER_006", "소셜 로그인 사용자는 비밀번호를 변경할 수 없습니다.");
 
     private final HttpStatus status;
     private final String code;

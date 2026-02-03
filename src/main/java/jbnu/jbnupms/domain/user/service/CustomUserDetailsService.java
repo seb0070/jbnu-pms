@@ -20,10 +20,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        User user = userRepository.findById(Long.parseLong(userId))
+        User user = userRepository.findActiveById(Long.parseLong(userId))
                 .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
 
-        if (user.getDeletedAt() != null) {
+        if (user.getIsDeleted()) {
             throw new GlobalException(ErrorCode.USER_ALREADY_DELETED);
         }
 
@@ -35,7 +35,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     public User getUserById(Long userId) {
-        return userRepository.findById(userId)
+        return userRepository.findActiveById(userId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
     }
 }
