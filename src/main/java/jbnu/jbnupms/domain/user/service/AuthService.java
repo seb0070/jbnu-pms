@@ -1,7 +1,7 @@
 package jbnu.jbnupms.domain.user.service;
 
 import jbnu.jbnupms.common.exception.ErrorCode;
-import jbnu.jbnupms.common.exception.GlobalException;
+import jbnu.jbnupms.common.exception.CustomException;
 import jbnu.jbnupms.security.jwt.JwtTokenProvider;
 import jbnu.jbnupms.domain.user.dto.LoginRequest;
 import jbnu.jbnupms.domain.user.dto.RegisterRequest;
@@ -30,7 +30,7 @@ public class AuthService {
     @Transactional
     public Long register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new GlobalException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         User user = User.builder()
@@ -48,14 +48,14 @@ public class AuthService {
     @Transactional
     public TokenResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new GlobalException(ErrorCode.INVALID_CREDENTIALS));
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_CREDENTIALS));
 
         if (user.getDeletedAt() != null) {
-            throw new GlobalException(ErrorCode.USER_ALREADY_DELETED);
+            throw new CustomException(ErrorCode.USER_ALREADY_DELETED);
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new GlobalException(ErrorCode.INVALID_CREDENTIALS);
+            throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail());
@@ -70,15 +70,15 @@ public class AuthService {
     @Transactional
     public TokenResponse refresh(String refreshTokenValue) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenValue)
-                .orElseThrow(() -> new GlobalException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
         if (refreshToken.isExpired()) {
             refreshTokenRepository.delete(refreshToken);
-            throw new GlobalException(ErrorCode.EXPIRED_TOKEN);
+            throw new CustomException(ErrorCode.EXPIRED_TOKEN);
         }
 
         User user = userRepository.findById(refreshToken.getUserId())
-                .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         String newAccessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail());
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getId());

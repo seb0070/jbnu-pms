@@ -1,7 +1,7 @@
 package jbnu.jbnupms.domain.user.service;
 
 import jbnu.jbnupms.common.exception.ErrorCode;
-import jbnu.jbnupms.common.exception.GlobalException;
+import jbnu.jbnupms.common.exception.CustomException;
 import jbnu.jbnupms.domain.user.entity.User;
 import jbnu.jbnupms.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +21,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
         User user = userRepository.findById(Long.parseLong(userId))
-                .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getDeletedAt() != null) {
-            throw new GlobalException(ErrorCode.USER_ALREADY_DELETED);
+            throw new CustomException(ErrorCode.USER_ALREADY_DELETED);
         }
 
         return new org.springframework.security.core.userdetails.User(
@@ -36,6 +36,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 }

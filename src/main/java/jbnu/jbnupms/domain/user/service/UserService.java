@@ -1,7 +1,7 @@
 package jbnu.jbnupms.domain.user.service;
 
 import jbnu.jbnupms.common.exception.ErrorCode;
-import jbnu.jbnupms.common.exception.GlobalException;
+import jbnu.jbnupms.common.exception.CustomException;
 import jbnu.jbnupms.domain.user.dto.UpdateUserRequest;
 import jbnu.jbnupms.domain.user.dto.UserResponse;
 import jbnu.jbnupms.domain.user.entity.User;
@@ -36,13 +36,13 @@ public class UserService {
     @Transactional
     public UserResponse updateUser(Long requestUserId, Long targetUserId, UpdateUserRequest request) {
         if (!requestUserId.equals(targetUserId)) {
-            throw new GlobalException(ErrorCode.ACCESS_DENIED);
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
 
         User user = findUserById(targetUserId);
 
         if (!user.getProvider().equals("EMAIL") && request.getPassword() != null) {
-            throw new GlobalException(ErrorCode.ACCESS_DENIED);
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
 
         if (request.getName() != null && !request.getName().isBlank()) {
@@ -62,7 +62,7 @@ public class UserService {
     @Transactional
     public void deleteUser(Long requestUserId, Long targetUserId) {
         if (!requestUserId.equals(targetUserId)) {
-            throw new GlobalException(ErrorCode.ACCESS_DENIED);
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
 
         User user = findUserById(targetUserId);
@@ -75,10 +75,10 @@ public class UserService {
 
     private User findUserById(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getDeletedAt() != null) {
-            throw new GlobalException(ErrorCode.USER_ALREADY_DELETED);
+            throw new CustomException(ErrorCode.USER_ALREADY_DELETED);
         }
 
         return user;
