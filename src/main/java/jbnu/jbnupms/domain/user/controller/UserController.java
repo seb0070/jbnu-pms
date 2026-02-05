@@ -1,7 +1,11 @@
 package jbnu.jbnupms.domain.user.controller;
 
 import jakarta.validation.Valid;
+<<<<<<< feat/common-response
 import jbnu.jbnupms.common.response.CommonResponse;
+=======
+import jbnu.jbnupms.domain.user.dto.DeleteUserRequest;
+>>>>>>> feat/user-refactor
 import jbnu.jbnupms.domain.user.dto.UpdateUserRequest;
 import jbnu.jbnupms.domain.user.dto.UserResponse;
 import jbnu.jbnupms.domain.user.service.UserService;
@@ -42,10 +46,16 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public ResponseEntity<CommonResponse<Void>> deleteUser(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable Long userId
+            @PathVariable Long userId,
+            @Valid @RequestBody DeleteUserRequest request
     ) {
         Long requestUserId = Long.parseLong(userDetails.getUsername());
+<<<<<<< feat/common-response
         userService.deleteUser(requestUserId, userId);
         return ResponseEntity.ok(CommonResponse.success(null));
+=======
+        userService.deleteUser(requestUserId, userId, request.getReason());
+        return ResponseEntity.ok().build();
+>>>>>>> feat/user-refactor
     }
 }
