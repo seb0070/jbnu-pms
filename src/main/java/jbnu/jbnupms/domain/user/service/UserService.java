@@ -2,7 +2,7 @@ package jbnu.jbnupms.domain.user.service;
 
 import jbnu.jbnupms.common.audit.UserAuditLogger;
 import jbnu.jbnupms.common.exception.ErrorCode;
-import jbnu.jbnupms.common.exception.GlobalException;
+import jbnu.jbnupms.common.exception.CustomException;
 import jbnu.jbnupms.domain.user.dto.UpdateUserRequest;
 import jbnu.jbnupms.domain.user.dto.UserResponse;
 import jbnu.jbnupms.domain.user.entity.User;
@@ -42,7 +42,7 @@ public class UserService {
     public UserResponse updateUser(Long requestUserId, Long targetUserId, UpdateUserRequest request) {
         // 본인만 수정 가능
         if (!requestUserId.equals(targetUserId)) {
-            throw new GlobalException(ErrorCode.ACCESS_DENIED);
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
 
         User user = findActiveUserById(targetUserId);
@@ -60,7 +60,7 @@ public class UserService {
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             // 소셜 로그인 사용자는 비밀번호 변경 불가
             if (!user.getProvider().equals("EMAIL")) {
-                throw new GlobalException(ErrorCode.SOCIAL_USER_PASSWORD_CHANGE);
+                throw new CustomException(ErrorCode.SOCIAL_USER_PASSWORD_CHANGE);
             }
 
             String encodedPassword = passwordEncoder.encode(request.getPassword());
@@ -92,7 +92,7 @@ public class UserService {
     public void deleteUser(Long requestUserId, Long targetUserId, String reason) {
         // 본인만 탈퇴 가능
         if (!requestUserId.equals(targetUserId)) {
-            throw new GlobalException(ErrorCode.ACCESS_DENIED);
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
 
         User user = findActiveUserById(targetUserId);
@@ -119,10 +119,10 @@ public class UserService {
 
     private User findActiveUserById(Long userId) {
         User user = userRepository.findActiveById(userId)
-                .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getIsDeleted()) {
-            throw new GlobalException(ErrorCode.USER_ALREADY_DELETED);
+            throw new CustomException(ErrorCode.USER_ALREADY_DELETED);
         }
 
         return user;

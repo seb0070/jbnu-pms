@@ -6,8 +6,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
+import jbnu.jbnupms.common.exception.CustomException;
 import jbnu.jbnupms.common.exception.ErrorCode;
-import jbnu.jbnupms.common.exception.GlobalException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -44,7 +44,7 @@ public class JwtTokenProvider {
                 .claim("type", "access")
                 .issuedAt(now)
                 .expiration(expiration)
-                .signWith(key)  // SignatureAlgorithm 제거
+                .signWith(key)
                 .compact();
     }
 
@@ -57,7 +57,7 @@ public class JwtTokenProvider {
                 .claim("type", "refresh")
                 .issuedAt(now)
                 .expiration(expiration)
-                .signWith(key)  // SignatureAlgorithm 제거
+                .signWith(key)
                 .compact();
     }
 
@@ -72,18 +72,18 @@ public class JwtTokenProvider {
             return true;
         } catch (ExpiredJwtException e) {
             log.error("Expired JWT token: {}", e.getMessage());
-            throw new GlobalException(ErrorCode.EXPIRED_TOKEN);
+            throw new CustomException(ErrorCode.EXPIRED_TOKEN);
         } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
             log.error("Invalid JWT token: {}", e.getMessage());
-            throw new GlobalException(ErrorCode.INVALID_TOKEN);
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
     }
 
     private Claims parseClaims(String token) {
-        return Jwts.parser()  // parserBuilder() → parser()
-                .verifyWith(key)  // setSigningKey() → verifyWith()
+        return Jwts.parser()
+                .verifyWith(key)
                 .build()
-                .parseSignedClaims(token)  // parseClaimsJws() → parseSignedClaims()
-                .getPayload();  // getBody() → getPayload()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }
