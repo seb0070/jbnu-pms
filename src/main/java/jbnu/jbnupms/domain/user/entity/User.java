@@ -1,10 +1,7 @@
 package jbnu.jbnupms.domain.user.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -38,9 +35,12 @@ public class User {
     @Column(length = 1000)
     private String profileImage;
 
-    @Column(length = 10, nullable = false)
+    // "EMAIL,GOOGLE" 형태로 저장
+    @Setter
+    @Column(length = 20, nullable = false)
     private String provider = "EMAIL";
 
+    @Setter
     @Column(length = 255)
     private String providerId;
 
@@ -78,4 +78,5 @@ public class User {
     public void restore() {
         this.isDeleted = false;
     }
+
 }
