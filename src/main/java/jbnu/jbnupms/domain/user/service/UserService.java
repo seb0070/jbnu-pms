@@ -47,15 +47,9 @@ public class UserService {
 
         User user = findActiveUserById(targetUserId);
 
-<<<<<<< feat/common-response
-        if (!user.getProvider().equals("EMAIL") && request.getPassword() != null) {
-            throw new CustomException(ErrorCode.ACCESS_DENIED);
-        }
-=======
         // 변경 전 데이터 저장 (감사 로그용)
         String oldName = user.getName();
         String oldProfileImage = user.getProfileImage();
->>>>>>> feat/user-refactor
 
         // 이름 업데이트
         if (request.getName() != null && !request.getName().isBlank()) {
@@ -66,7 +60,7 @@ public class UserService {
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             // 소셜 로그인 사용자는 비밀번호 변경 불가
             if (!user.getProvider().equals("EMAIL")) {
-                throw new GlobalException(ErrorCode.SOCIAL_USER_PASSWORD_CHANGE);
+                throw new CustomException(ErrorCode.SOCIAL_USER_PASSWORD_CHANGE);
             }
 
             String encodedPassword = passwordEncoder.encode(request.getPassword());
@@ -123,21 +117,12 @@ public class UserService {
         log.info("User deleted successfully: userId={}, email={}", targetUserId, user.getEmail());
     }
 
-<<<<<<< feat/common-response
-    private User findUserById(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        if (user.getDeletedAt() != null) {
-            throw new CustomException(ErrorCode.USER_ALREADY_DELETED);
-=======
     private User findActiveUserById(Long userId) {
         User user = userRepository.findActiveById(userId)
-                .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getIsDeleted()) {
-            throw new GlobalException(ErrorCode.USER_ALREADY_DELETED);
->>>>>>> feat/user-refactor
+            throw new CustomException(ErrorCode.USER_ALREADY_DELETED);
         }
 
         return user;

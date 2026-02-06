@@ -65,13 +65,8 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_CREDENTIALS));
 
-<<<<<<< feat/common-response
-        if (user.getDeletedAt() != null) {
-            throw new CustomException(ErrorCode.USER_ALREADY_DELETED);
-=======
         if (user.getIsDeleted()) {
-            throw new GlobalException(ErrorCode.USER_ALREADY_DELETED);
->>>>>>> feat/user-refactor
+            throw new CustomException(ErrorCode.USER_ALREADY_DELETED);
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -97,13 +92,8 @@ public class AuthService {
             throw new CustomException(ErrorCode.EXPIRED_TOKEN);
         }
 
-<<<<<<< feat/common-response
-        User user = userRepository.findById(refreshToken.getUserId())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-=======
         User user = userRepository.findActiveById(refreshToken.getUserId())
-                .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND));
->>>>>>> feat/user-refactor
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         String newAccessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail());
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
