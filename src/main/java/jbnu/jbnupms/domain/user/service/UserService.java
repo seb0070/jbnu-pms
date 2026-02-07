@@ -100,7 +100,7 @@ public class UserService {
         // 탈퇴 전 원본 이메일 저장 (감사 로그용)
         String originalEmail = user.getEmail();
 
-        // 1. withdrawn_users 테이블에 정보 저장 (원본 이메일로)
+        // 1. withdrawn_users 테이블에 정보 저장 (원본 이메일)
         WithdrawnUser withdrawnUser = WithdrawnUser.builder()
                 .email(originalEmail)
                 .reason(reason)
