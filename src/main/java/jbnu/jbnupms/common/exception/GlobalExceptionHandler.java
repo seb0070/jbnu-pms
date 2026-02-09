@@ -81,7 +81,7 @@ public class GlobalExceptionHandler {
             AccessDeniedException e,
             HttpServletRequest request) {
 
-        ErrorCode errorCode = ErrorCode.FORBIDDEN;
+        ErrorCode errorCode = ErrorCode.ACCESS_DENIED;
 
         log.info("[AccessDeniedException] url: {} | message: {}", request.getRequestURI(), e.getMessage());
 
