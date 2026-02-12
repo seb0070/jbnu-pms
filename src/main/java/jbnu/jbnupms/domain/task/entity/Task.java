@@ -95,6 +95,5 @@ public class Task {
 
     public void addChild(Task child) {
         this.children.add(child);
-        // child.setParent(this); // Parent is set in constructor/builder usually, but setter might be needed if bi-directional management is strict
     }
 }

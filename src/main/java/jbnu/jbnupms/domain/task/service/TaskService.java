@@ -36,8 +36,8 @@ public class TaskService {
     // 태스크 생성
     @Transactional
     public Long createTask(Long userId, TaskCreateRequest request) {
-        User user = getUser(userId);
-        Project project = getProject(request.getProjectId());
+        User user = this.getUser(userId);
+        Project project = this.getProject(request.getProjectId());
         
         // 프로젝트 멤버인지 확인
         this.validateProjectMember(project.getId(), user.getId());
@@ -83,7 +83,7 @@ public class TaskService {
 
         List<Task> rootTasks = taskRepository.findRootTasksByProjectId(projectId);
         
-        // 프로젝트 내 모든 담당자 조회 후 Map으로 그룹화 (Bulk Fetch)
+        // 프로젝트 내 모든 담당자 조회 후 Map으로 그룹화
         List<TaskAssignee> allAssignees = taskAssigneeRepository.findAllByTask_ProjectId(projectId);
         Map<Long, List<TaskAssignee>> assigneeMap = allAssignees.stream()
                 .collect(Collectors.groupingBy(ta -> ta.getTask().getId()));
@@ -96,7 +96,7 @@ public class TaskService {
 
     // 태스크 단건 조회
     public TaskResponse getTask(Long userId, Long taskId) {
-        Task task = getTaskById(taskId);
+        Task task = this.getTaskById(taskId);
         Long projectId = task.getProject().getId();
         this.validateProjectMember(projectId, userId);
         
@@ -111,8 +111,8 @@ public class TaskService {
     // 태스크 수정
     @Transactional
     public void updateTask(Long userId, Long taskId, TaskUpdateRequest request) {
-        Task task = getTaskById(taskId);
-        this.validateProjectMember(task.getProject().getId(), userId); // 수정 권한: 프로젝트 멤버면 가능? 아니면 생성자/담당자만? 일단 프로젝트 멤버면 가능으로.
+        Task task = this.getTaskById(taskId);
+        this.validateProjectMember(task.getProject().getId(), userId);
 
         task.update(
                 request.getTitle() != null ? request.getTitle() : task.getTitle(),
@@ -127,17 +127,8 @@ public class TaskService {
     // 태스크 삭제
     @Transactional
     public void deleteTask(Long userId, Long taskId) {
-        Task task = getTaskById(taskId);
-        validateProjectMember(task.getProject().getId(), userId); 
-        
-        // 권한 체크: 생성자 혹은 프로젝트 관리자/스페이스 관리자 등
-        // 일단 본인이 생성한 태스크거나, (추후) 관리자 권한 확인 필요
-        if (!task.getCreator().getId().equals(userId)) {
-             // throw new CustomException(ErrorCode.ACCESS_DENIED, "태스크 삭제 권한이 없습니다.");
-             // 일단 프로젝트 멤버면 삭제 가능하게 할지, 아니면 Creator만? 
-             // 요구사항 명시 없으면 안전하게 Creator Only + Admin (Admin check logic needed if strict)
-             // 여기서 Admin check 복잡하므로 일단 Skip
-        }
+        Task task = this.getTaskById(taskId);
+        this.validateProjectMember(task.getProject().getId(), userId);
         
         taskRepository.delete(task);
     }
@@ -145,7 +136,7 @@ public class TaskService {
     // 담당자 추가
     @Transactional
     public void addAssignee(Long userId, Long taskId, Long assigneeId) {
-        Task task = getTaskById(taskId);
+        Task task = this.getTaskById(taskId);
         this.validateProjectMember(task.getProject().getId(), userId);
 
         assignUserToTask(task, assigneeId);
@@ -154,16 +145,16 @@ public class TaskService {
     // 담당자 삭제
     @Transactional
     public void removeAssignee(Long userId, Long taskId, Long assigneeId) {
-        Task task = getTaskById(taskId);
+        Task task = this.getTaskById(taskId);
         this.validateProjectMember(task.getProject().getId(), userId);
 
-        User assignee = getUser(assigneeId);
+        User assignee = this.getUser(assigneeId);
         
         taskAssigneeRepository.deleteByTaskAndUser(task, assignee);
     }
 
     private void assignUserToTask(Task task, Long assigneeId) {
-        User assignee = getUser(assigneeId);
+        User assignee = this.getUser(assigneeId);
         // 담당자도 프로젝트 멤버여야 함
         this.validateProjectMember(task.getProject().getId(), assigneeId);
 

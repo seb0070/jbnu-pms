@@ -61,19 +61,10 @@ public class TaskResponse {
     }
 
     // 담당자 정보 포함하지 않는 변환
-    // 재귀 하위 작업 변환 시 순환 참조 문제 방지
-    // -> 이제 아래 Map 기반 메서드를 주로 사용하여 하위 작업에도 담당자를 포함시킬 수 있음
     public static TaskResponse from(Task task) {
          return from(task, Collections.emptyMap());
     }
 
-    /**
-     * Task 엔티티와 전체 프로젝트 담당자 맵(assigneeMap)을 받아 TaskResponse DTO로 변환합니다.
-     * 하위 작업(children)에도 담당자 정보를 재귀적으로 포함시킵니다.
-     *
-     * @param task        변환할 Task 엔티티
-     * @param assigneeMap 프로젝트 내의 모든 TaskAssignee를 TaskId 별로 그룹화한 Map
-     */
     public static TaskResponse from(Task task, Map<Long, List<TaskAssignee>> assigneeMap) {
         List<TaskAssignee> taskAssignees = assigneeMap.getOrDefault(task.getId(), Collections.emptyList());
 
