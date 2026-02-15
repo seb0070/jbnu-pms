@@ -5,7 +5,7 @@ COPY gradle ./gradle
 COPY src ./src
 RUN gradle clean build -x test --no-daemon
 
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 RUN apt-get update && apt-get install -y wget curl && rm -rf /var/lib/apt/lists/*
 
